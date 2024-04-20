@@ -1,6 +1,7 @@
+import requests
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QGraphicsDropShadowEffect, QStackedWidget, QVBoxLayout, QFrame, QMessageBox, QDialog, QPlainTextEdit, QPushButton, QComboBox
-from PyQt5.QtCore import QTimer, QDateTime, Qt, QLocale
-from PyQt5.QtGui import QColor, QFontDatabase, QFont, QPixmap
+from PyQt5.QtCore import QTimer, QDateTime, Qt, QLocale, QCoreApplication
+from PyQt5.QtGui import QColor, QFontDatabase, QFont, QPixmap, QShowEvent, QCloseEvent
 from PyQt5.uic import loadUi
 import DataBase
 import sys
@@ -8,9 +9,9 @@ import re
 import datetime
 import random
 
-class RejisterPage(QWidget):
+class RegisterPage(QWidget):
     def __init__(self):
-        super(RejisterPage, self).__init__()
+        super(RegisterPage, self).__init__()
         loadUi("./ui/registerPage.ui", self)
         self.shadow()
         self.stacked()
@@ -89,23 +90,21 @@ class Login(QWidget):
 
     #===================================================#
     def checkUser(self):
-        allUser = DataBase.checkUser()
-        for user in allUser:
-            if user['userName'] == self.userNameLineEdit.text() and user['password'] == self.passwordLineEdit.text():
-                self.errorLabel.setText('')
-                loggedUser['id'] = user['id']
-                loggedUser['userName'] = user['userName']
-                loggedUser['password'] = user['password']
-                loggedUser['score'] = user['score']
-                loggedUser['class'] = user['class']
-                loggedUser['email'] = user['email']
-                loggedUser['profileImage'] = user['profileImage']
-
-                mainWindow.show()
-                rejisterWindow.close()
-
-            else:
-                self.errorLabel.setText('نام کاربری یا رمز عبور اشتباه است')
+        DataBase.checkConnection(registerWindow)
+        user = DataBase.checkUser(userName=self.userNameLineEdit.text(), password=self.passwordLineEdit.text())
+        if user is not None:
+            self.errorLabel.setText('')
+            loggedUser['id'] = user['id']
+            loggedUser['userName'] = user['userName']
+            loggedUser['password'] = user['password']
+            loggedUser['score'] = user['score']
+            loggedUser['class'] = user['class']
+            loggedUser['email'] = user['email']
+            loggedUser['profileImage'] = user['profileImage']
+            mainWindow.show()
+            registerWindow.close()
+        else:
+            self.errorLabel.setText('نام کاربری یا رمز عبور اشتباه است')
 
 class SignUp(QWidget):
     def __init__(self):
@@ -186,7 +185,7 @@ class SignUp(QWidget):
             self.spiecialCharacterCheckResult = False
 
     def saveUser(self):
-        allUser= DataBase.checkUserName()
+        DataBase.checkConnection(registerWindow)
         userName = self.userNameLineEdit.text()
         password = self.passwordLineEdit.text()
         rePassword = self.repeatPasswordLineEdit.text()
@@ -195,7 +194,7 @@ class SignUp(QWidget):
         passwordValid = False
         rePasswordValid = False
         if userName.replace(' ',''):
-            if userName not in allUser:
+            if DataBase.checkUserName(userName):
                 self.userNameErrorLabel.setText('')
                 userNameValid = True
             else:
@@ -257,6 +256,7 @@ class Main(QMainWindow):
 
         row = 0
         column = 0
+        DataBase.checkConnection(mainWindow)
         exams = DataBase.gotAllExams()
         for exam in exams:
             card = CardFrame(exam)
@@ -305,6 +305,7 @@ class Main(QMainWindow):
 
         row = 0
         column = 0
+        DataBase.checkConnection(mainWindow)
         exams = DataBase.filterExames(self.searchLineEdit.text(), self.classComboBox.currentText())
         for exam in exams:
             card = CardFrame(exam)
@@ -363,6 +364,7 @@ class ProfileSetting(QWidget):
 
     #=======================================================#
     def saveInfo(self):
+        DataBase.checkConnection(profileSettingWindow)
         newEmail = self.emailLineEdit.text()
         newClass = self.classComboBox.currentText()
 
@@ -389,7 +391,6 @@ class ChangeUserName(QDialog):
         super(ChangeUserName, self).__init__()
         loadUi('./ui/changeUserName.ui', self)
         self.userNameValid = True
-        self.allUser = DataBase.checkUserName()
         self.fonts()
         self.labels()
         self.lineEdit()
@@ -418,8 +419,9 @@ class ChangeUserName(QDialog):
 
     #======================================================#
     def checkUserName(self):
+        DataBase.checkConnection(profileSettingWindow)
         text = self.userNameLineEdit.text()
-        if text in self.allUser:
+        if not DataBase.checkUserName(text):
             if text == loggedUser['userName']:
                 self.checkUserNameIcon.setPixmap(QPixmap('./image/accept.png'))
                 self.userNameValid = True
@@ -456,6 +458,12 @@ class ChangePassword(QDialog):
         self.labels()
         self.lineEdits()
         self.buttons()
+
+    def closeEvent(self, a0: QCloseEvent) -> None:
+        self.passwordLineEdit.setText('')
+        self.rePasswordLineEdit.setText('')
+        self.passwordErrorLabel.setText('')
+        self.rePasswordErrorLabel.setText('')
 
     def fonts(self):
         tanha = QFontDatabase.addApplicationFont('./font/Tanha.ttf')
@@ -535,6 +543,7 @@ class ChangePassword(QDialog):
             self.rePasswordErrorLabel.setText('رمز عبور و تکرار آن مطابقت ندارد. رمز عبور جدید ثبت نخواهد شد.')
 
     def saveNewPassword(self, button):
+        DataBase.checkConnection(profileSettingWindow)
         if button.text() == 'OK':
             if self.passwordLineEdit.text() != loggedUser['password']:
                 if self.widthCheckResult and self.capitalLettersCheckResult and self.numbersCheckResult and self.spiecialCharacterCheckResult:
@@ -546,7 +555,7 @@ class CardFrame(QFrame):
         super(CardFrame, self).__init__()
         loadUi('./ui/cardFrame2.ui',self)
         self.exam = exam
-        self.userDoExame = DataBase.checkUserDoExame(loggedUser['id'], self.exam['id'])
+        self.userDoExame = DataBase.checkUserDoExame(int(loggedUser['id']), int(self.exam['id']))
         self.fonts()
         self.shadows()
         self.labels()
@@ -580,12 +589,11 @@ class CardFrame(QFrame):
         if self.userDoExame:
             self.errorLabel.setText('شما قبلا این آزمون را انجام داده اید')
 
-        self.cardTitle.setText(self.exam['examTitle'])
-        self.cardShortDes.setText(self.exam['examInfo'])
-        self.scoreLabel.setText(f'امتیاز:{str(self.exam["examScore"])}')
-        self.questionsCountLabel.setText(f'تعداد سوال:{str(self.exam["examQuestionsCount"])}')
-        self.classLabel.setText(f'پایه:{str(self.exam["examClass"])}')
-
+        self.cardTitle.setText(self.exam['title'])
+        self.cardShortDes.setText(self.exam['info'])
+        self.scoreLabel.setText(f'امتیاز:{str(self.exam["score"])}')
+        self.questionsCountLabel.setText(f'تعداد سوال:{str(self.exam["questions_count"])}')
+        self.classLabel.setText(f'پایه:{str(self.exam["quiz_class"])}')
         self.imageLabel.setPixmap(QPixmap('./image/article2.jpg'))
 
     def button(self):
@@ -597,14 +605,15 @@ class CardFrame(QFrame):
 
     #============================================================#
     def showExameDetail(self):
+        DataBase.checkConnection(mainWindow)
         selectedExam['id'] = str(self.exam['id'])
-        selectedExam['examTitle'] = self.exam['examTitle']
-        selectedExam['examClass'] = self.exam['examClass']
-        selectedExam['examInfo'] = self.exam['examInfo']
-        selectedExam['examScore'] = str(self.exam['examScore'])
-        selectedExam['examQuestionsCount'] = str(self.exam['examQuestionsCount'])
-        selectedExam['examTime'] = self.exam['examTime']
-        selectedExam['examMaker'] = self.exam['examMaker']
+        selectedExam['examTitle'] = self.exam['title']
+        selectedExam['examClass'] = self.exam['quiz_class']
+        selectedExam['examInfo'] = self.exam['info']
+        selectedExam['examScore'] = str(self.exam['score'])
+        selectedExam['examQuestionsCount'] = str(self.exam['questions_count'])
+        selectedExam['examTime'] = self.exam['time']
+        selectedExam['examMaker'] = self.exam['maker']
         exameDetailWindow.show()
 
 
@@ -690,6 +699,7 @@ class ExameDetail(QWidget):
 
     #==========================================================#
     def startExam(self):
+        DataBase.checkConnection(exameDetailWindow)
         examePageWindow.show()
         mainWindow.close()
         self.close()
@@ -772,12 +782,14 @@ class ExamePage(QWidget):
             self.finishExame()
 
     def finishExame(self):
+        DataBase.checkConnection(examePageWindow)
+
         self.examTimer.stop()
-        DataBase.saveUsersDoExame(loggedUser['id'], selectedExam['id'])
         noneAnwser = 0
         rightAnwser = 0
         wrongAnwser = 0
         scoreGot = 0
+
         for question in currentExamQuestions:
             if question['isAnwsered'] == False:
                 noneAnwser += 1
@@ -787,8 +799,8 @@ class ExamePage(QWidget):
             elif str(question['anwser']) != str(question['userAnwser']):
                 wrongAnwser += 1
 
-
-        DataBase.updateScore(loggedUser['id'], loggedUser['score'], scoreGot)
+        DataBase.saveUsersDoExame(int(loggedUser['id']), int(selectedExam['id']), int(scoreGot))
+        DataBase.updateScore(int(loggedUser['id']), int(scoreGot))
         loggedUser['score'] = int(loggedUser['score']) + scoreGot
 
         finishedExameInfo['scoreGot'] = scoreGot
@@ -948,7 +960,7 @@ class ExamResult(QWidget):
 
 
 if __name__ == "__main__":
-    global rejisterWindow, mainWindow, exameDetailWindow, profileSettingWindow, changeUserNameWindow, changePasswordWindow, examePageWindow, examResultWindow, currentExamQuestions, loggedUser, selectedExam, finishedExameInfo
+    global registerWindow, mainWindow, exameDetailWindow, profileSettingWindow, changeUserNameWindow, changePasswordWindow, examePageWindow, examResultWindow, currentExamQuestions, loggedUser, selectedExam, finishedExameInfo
     app = QApplication(sys.argv)
 
     loggedUser = {'id': '', 'userName': '', 'password': '', 'score': '', 'class': '', 'email': '', 'profileImage': ''}
@@ -956,7 +968,7 @@ if __name__ == "__main__":
     finishedExameInfo = {'scoreGot': 0, 'wrongAnwser': 0, 'rightAnwser': 0, 'noneAnwser': 0}
     currentExamQuestions = []
 
-    rejisterWindow = RejisterPage()
+    registerWindow = RegisterPage()
     mainWindow = Main()
     exameDetailWindow = ExameDetail()
     examePageWindow = ExamePage()
@@ -965,7 +977,7 @@ if __name__ == "__main__":
     changeUserNameWindow = ChangeUserName()
     changePasswordWindow = ChangePassword()
 
-    rejisterWindow.show()
+    registerWindow.show()
     sys.exit(app.exec_())
 
 # password Space
