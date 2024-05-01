@@ -1,13 +1,16 @@
-import requests
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QGraphicsDropShadowEffect, QStackedWidget, QVBoxLayout, QFrame, QMessageBox, QDialog, QPlainTextEdit, QPushButton, QComboBox
-from PyQt5.QtCore import QTimer, QDateTime, Qt, QLocale, QCoreApplication
-from PyQt5.QtGui import QColor, QFontDatabase, QFont, QPixmap, QShowEvent, QCloseEvent
-from PyQt5.uic import loadUi
-import DataBase
-import sys
-import re
 import datetime
 import random
+import re
+import sys
+
+from PyQt5.QtCore import QTimer, QDateTime, Qt
+from PyQt5.QtGui import QColor, QFontDatabase, QFont, QPixmap, QCloseEvent, QShowEvent
+from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QGraphicsDropShadowEffect, QStackedWidget, QVBoxLayout, \
+    QFrame, QMessageBox, QDialog, QPushButton, QLabel, QComboBox, QSpinBox, QTextEdit, QCheckBox
+from PyQt5.uic import loadUi
+
+import DataBase
+
 
 class RegisterPage(QWidget):
     def __init__(self):
@@ -41,11 +44,11 @@ class RegisterPage(QWidget):
 
     def labels(self):
         self.iconLabel.setPixmap(QPixmap('./image/appIcon.png'))
-        self.appNameLabel.setFont(QFont(self.tanha[0],18))
-        self.shortDecLabel.setFont(QFont(self.tanha[0],11))
+        self.appNameLabel.setFont(QFont(self.tanha[0], 18))
+        self.shortDecLabel.setFont(QFont(self.tanha[0], 11))
 
     def buttons(self):
-        self.signUpButton.setFont(QFont(self.tanha[0],10))
+        self.signUpButton.setFont(QFont(self.tanha[0], 10))
         self.signInButton.setFont(QFont(self.tanha[0], 10))
 
         self.signUpButton.clicked.connect(self.singupPage)
@@ -58,6 +61,7 @@ class RegisterPage(QWidget):
 
     def singInPage(self):
         self.stack.setCurrentIndex(0)
+
 
 class Login(QWidget):
     def __init__(self):
@@ -73,22 +77,22 @@ class Login(QWidget):
         self.tanha = QFontDatabase.applicationFontFamilies(tanha)
 
     def labels(self):
-        self.titleLabel.setFont(QFont(self.tanha[0],20))
-        self.commentLabel.setFont(QFont(self.tanha[0],10))
-        self.userNameLabel.setFont(QFont(self.tanha[0],10))
-        self.passwordLabel.setFont(QFont(self.tanha[0],10))
+        self.titleLabel.setFont(QFont(self.tanha[0], 20))
+        self.commentLabel.setFont(QFont(self.tanha[0], 10))
+        self.userNameLabel.setFont(QFont(self.tanha[0], 10))
+        self.passwordLabel.setFont(QFont(self.tanha[0], 10))
 
-        self.errorLabel.setFont(QFont(self.tanha[0],10))
+        self.errorLabel.setFont(QFont(self.tanha[0], 10))
 
     def lineEdits(self):
-        self.userNameLineEdit.setFont(QFont(self.tanha[0],10))
-        self.passwordLineEdit.setFont(QFont(self.tanha[0],10))
+        self.userNameLineEdit.setFont(QFont(self.tanha[0], 10))
+        self.passwordLineEdit.setFont(QFont(self.tanha[0], 10))
 
     def pushButton(self):
-        self.loginBtn.setFont(QFont(self.tanha[0],14))
+        self.loginBtn.setFont(QFont(self.tanha[0], 14))
         self.loginBtn.clicked.connect(self.checkUser)
 
-    #===================================================#
+    # ===================================================#
     def checkUser(self):
         DataBase.checkConnection(registerWindow)
         user = DataBase.checkUser(userName=self.userNameLineEdit.text(), password=self.passwordLineEdit.text())
@@ -101,19 +105,54 @@ class Login(QWidget):
             loggedUser['class'] = user['class']
             loggedUser['email'] = user['email']
             loggedUser['profileImage'] = user['profileImage']
-            mainWindow.show()
+            loggedUser['isTeacher'] = user['isTeacher']
+            if loggedUser['isTeacher']:
+                teacherMainWindow.show()
+            else:
+                studentMainWindow.show()
             registerWindow.close()
         else:
             self.errorLabel.setText('نام کاربری یا رمز عبور اشتباه است')
 
+
 class SignUp(QWidget):
     def __init__(self):
         super().__init__()
-        loadUi('./ui/signUp.ui',self)
+        loadUi('./ui/signUp.ui', self)
+        self.fonts()
+        self.buttons()
+
+    def fonts(self):
+        tanha = QFontDatabase.addApplicationFont('./font/Tanha.ttf')
+        self.tanha = QFontDatabase.applicationFontFamilies(tanha)
+
+        self.title.setFont(QFont(self.tanha[0], 12))
+        self.shortDec.setFont(QFont(self.tanha[0], 10))
+
+    def buttons(self):
+        self.studentButton.setFont(QFont(self.tanha[0], 10))
+        self.teacherButton.setFont(QFont(self.tanha[0], 10))
+
+        self.studentButton.clicked.connect(lambda : self.stackedWidget.setCurrentIndex(0))
+        self.teacherButton.clicked.connect(lambda : self.stackedWidget.setCurrentIndex(1))
+
+    def showEvent(self, a0: QShowEvent) -> None:
+        self.stackedWidget.removeWidget(self.page)
+        self.stackedWidget.removeWidget(self.page_2)
+        self.stackedWidget.addWidget(studentSignUpWindow)
+        self.stackedWidget.addWidget(teacherSignUpWindow)
+
+
+class TeacherSignUpPage(QWidget):
+    def __init__(self):
+        super(TeacherSignUpPage, self).__init__()
+        loadUi('./ui/teacherSignUpPage.ui', self)
         self.numbersCheckResult = False
         self.spiecialCharacterCheckResult = False
         self.capitalLettersCheckResult = False
         self.widthCheckResult = False
+
+        self.scrollAreaWidgetContents.setStyleSheet("background: #ffffff;border:none;")
 
         self.fonts()
         self.labels()
@@ -125,19 +164,31 @@ class SignUp(QWidget):
         self.tanha = QFontDatabase.applicationFontFamilies(tanha)
 
     def labels(self):
-        self.title.setFont(QFont(self.tanha[0],20))
-        self.shortDec.setFont(QFont(self.tanha[0],10))
-        self.userName.setFont(QFont(self.tanha[0],10))
-        self.password.setFont(QFont(self.tanha[0],10))
-        self.rePassword.setFont(QFont(self.tanha[0],10))
-        self.widthText.setFont(QFont(self.tanha[0],8))
-        self.numText.setFont(QFont(self.tanha[0],8))
-        self.specText.setFont(QFont(self.tanha[0],8))
-        self.capText.setFont(QFont(self.tanha[0],8))
+        self.title.setFont(QFont(self.tanha[0], 12))
+        # self.shortDec.setFont(QFont(self.tanha[0], 10))
+        self.userName.setFont(QFont(self.tanha[0], 10))
+        self.password.setFont(QFont(self.tanha[0], 10))
+        self.rePassword.setFont(QFont(self.tanha[0], 10))
+        self.widthText.setFont(QFont(self.tanha[0], 8))
+        self.numText.setFont(QFont(self.tanha[0], 8))
+        self.specText.setFont(QFont(self.tanha[0], 8))
+        self.capText.setFont(QFont(self.tanha[0], 8))
 
-        self.userNameErrorLabel.setFont(QFont(self.tanha[0],8))
-        self.passwoedValidErrorLabel.setFont(QFont(self.tanha[0],8))
-        self.samePasswordErrorLabel.setFont(QFont(self.tanha[0],8))
+        self.userNameErrorLabel.setFont(QFont(self.tanha[0], 8))
+        self.passwoedValidErrorLabel.setFont(QFont(self.tanha[0], 8))
+        self.samePasswordErrorLabel.setFont(QFont(self.tanha[0], 8))
+
+        self.firstNameLabel.setFont(QFont(self.tanha[0], 10))
+        self.lastNameLabel.setFont(QFont(self.tanha[0], 10))
+        self.emailLabel.setFont(QFont(self.tanha[0], 10))
+
+        self.firstNameLineEdit.setFont(QFont(self.tanha[0], 10))
+        self.lastNameLineEdit.setFont(QFont(self.tanha[0], 10))
+        self.emailLineEdit.setFont(QFont(self.tanha[0], 10))
+
+        self.firstNameErrorLabel.setFont(QFont(self.tanha[0], 8))
+        self.lastNameErrorLabel.setFont(QFont(self.tanha[0], 8))
+        self.emailErrorLabel.setFont(QFont(self.tanha[0], 8))
 
         self.numbersCheck.setPixmap(QPixmap('./image/cross.png'))
         self.spiecialCharacterCheck.setPixmap(QPixmap('./image/cross.png'))
@@ -145,7 +196,167 @@ class SignUp(QWidget):
         self.widthCheck.setPixmap(QPixmap('./image/cross.png'))
 
     def lineEdits(self):
-        self.userNameLineEdit.setFont(QFont(self.tanha[0], 8))
+        self.userNameLineEdit.setFont(QFont(self.tanha[0], 10))
+        self.passwordLineEdit.textChanged.connect(self.validat)
+
+    def butten(self):
+        self.singUpBtn.setFont(QFont(self.tanha[0], 14))
+        self.singUpBtn.clicked.connect(self.saveUser)
+
+        # -------------------------------------------------------------------------------
+
+    def validat(self):
+        password = self.passwordLineEdit.text()
+
+        if re.findall(".{8,}$", password):
+            self.widthCheck.setPixmap(QPixmap('./image/accept.png'))
+            self.widthCheckResult = True
+        else:
+            self.widthCheck.setPixmap(QPixmap('./image/cross.png'))
+            self.widthCheckResult = False
+
+        if re.findall("^(?=.* ?[A-Z])(?=.* ?[a-z])", password) and not re.findall(" +", password):
+            self.capitalLettersCheck.setPixmap(QPixmap('./image/accept.png'))
+            self.capitalLettersCheckResult = True
+        else:
+            self.capitalLettersCheck.setPixmap(QPixmap('./image/cross.png'))
+            self.capitalLettersCheckResult = False
+
+        if re.findall("(?=.* ?[0-9])", password):
+            self.numbersCheck.setPixmap(QPixmap('./image/accept.png'))
+            self.numbersCheckResult = True
+        else:
+            self.numbersCheck.setPixmap(QPixmap('./image/cross.png'))
+            self.numbersCheckResult = False
+
+        if re.findall("(?=.*?[#?!@$%^&*-])", password):
+            self.spiecialCharacterCheck.setPixmap(QPixmap('./image/accept.png'))
+            self.spiecialCharacterCheckResult = True
+        else:
+            self.spiecialCharacterCheck.setPixmap(QPixmap('./image/cross.png'))
+            self.spiecialCharacterCheckResult = False
+
+    def saveUser(self):
+        DataBase.checkConnection(registerWindow)
+        userName = self.userNameLineEdit.text()
+        name = self.firstNameLineEdit.text()
+        lastName = self.lastNameLineEdit.text()
+        email = self.emailLineEdit.text()
+        password = self.passwordLineEdit.text()
+        rePassword = self.repeatPasswordLineEdit.text()
+
+        userNameValid = False
+        nameValid = False
+        lastNameValid = False
+        emailValid = False
+        passwordValid = False
+        rePasswordValid = False
+
+        if userName.replace(' ', ''):
+            if DataBase.checkUserName(userName):
+                self.userNameErrorLabel.setText('')
+                userNameValid = True
+            else:
+                self.userNameErrorLabel.setText('این نام کاربری قبلا انتخاب شده است')
+        else:
+            self.userNameErrorLabel.setText('نام کاربری نباید خالی باشد')
+
+        if name.replace(' ', ''):
+            self.firstNameErrorLabel.setText('')
+            nameValid = True
+        else:
+            self.firstNameErrorLabel.setText('نام نباید خالی باشد')
+
+        if lastName.replace(' ', ''):
+            self.lastNameErrorLabel.setText('')
+            lastNameValid = True
+        else:
+            self.lastNameErrorLabel.setText('نام خوانوادگی نباید خالی باشد')
+
+        if email.replace(' ', ''):
+            if re.findall(r"^\S+@\S+\.\S+$", email.replace(' ', '')):
+                self.emailErrorLabel.setText('')
+                emailValid = True
+            else:
+                self.emailErrorLabel.setText('لطفا یک ایمیل معتبر وارد کنید')
+        else:
+            self.emailErrorLabel.setText('ایمیل نباید خالی باشد')
+
+        if self.numbersCheckResult and self.spiecialCharacterCheckResult and self.capitalLettersCheckResult and self.widthCheckResult:
+            self.passwoedValidErrorLabel.setText('')
+            passwordValid = True
+        else:
+            self.passwoedValidErrorLabel.setText('رمز عبور باید بصورت گفته شده وارد شود')
+
+        if password == rePassword:
+            self.samePasswordErrorLabel.setText('')
+            rePasswordValid = True
+        else:
+            self.samePasswordErrorLabel.setText('پسورد و تکرار آن مطابقت ندارد')
+
+        if userNameValid and passwordValid and rePasswordValid and nameValid and lastNameValid and emailValid:
+            massage = QMessageBox(self)
+            massage.setText('آیا از اطلاعت وارد شده مطمئن هستید؟')
+            massage.setIcon(QMessageBox.Warning)
+            massage.setWindowTitle('مهم')
+            massage.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            anwser = massage.exec()
+            if anwser == QMessageBox.Ok:
+                DataBase.createAccount(userName, password, name, lastName, email, True)
+                self.userNameLineEdit.setText('')
+                self.passwordLineEdit.setText('')
+                self.repeatPasswordLineEdit.setText('')
+                self.lastNameLineEdit.setText('')
+                self.firstNameLineEdit.setText('')
+                self.emailLineEdit.setText('')
+                massage2 = QMessageBox(self)
+                massage2.setText('حساب کاربری شما ایجاد شد.')
+                massage2.setStandardButtons(QMessageBox.Ok)
+                massage2.exec()
+
+
+class StudentSignUpPage(QWidget):
+    def __init__(self):
+        super(StudentSignUpPage, self).__init__()
+        loadUi('./ui/studentSignUpPage.ui', self)
+        self.numbersCheckResult = False
+        self.spiecialCharacterCheckResult = False
+        self.capitalLettersCheckResult = False
+        self.widthCheckResult = False
+
+        self.scrollAreaWidgetContents.setStyleSheet("background: #ffffff;border:none;")
+
+        self.fonts()
+        self.labels()
+        self.butten()
+        self.lineEdits()
+
+    def fonts(self):
+        tanha = QFontDatabase.addApplicationFont('./font/Tanha.ttf')
+        self.tanha = QFontDatabase.applicationFontFamilies(tanha)
+
+    def labels(self):
+        self.title.setFont(QFont(self.tanha[0], 12))
+        # self.shortDec.setFont(QFont(self.tanha[0], 10))
+        self.userName.setFont(QFont(self.tanha[0], 10))
+        self.password.setFont(QFont(self.tanha[0], 10))
+        self.rePassword.setFont(QFont(self.tanha[0], 10))
+        self.widthText.setFont(QFont(self.tanha[0], 8))
+        self.numText.setFont(QFont(self.tanha[0], 8))
+        self.specText.setFont(QFont(self.tanha[0], 8))
+        self.capText.setFont(QFont(self.tanha[0], 8))
+
+        self.userNameErrorLabel.setFont(QFont(self.tanha[0], 8))
+        self.passwoedValidErrorLabel.setFont(QFont(self.tanha[0], 8))
+        self.samePasswordErrorLabel.setFont(QFont(self.tanha[0], 8))
+
+        self.numbersCheck.setPixmap(QPixmap('./image/cross.png'))
+        self.spiecialCharacterCheck.setPixmap(QPixmap('./image/cross.png'))
+        self.capitalLettersCheck.setPixmap(QPixmap('./image/cross.png'))
+        self.widthCheck.setPixmap(QPixmap('./image/cross.png'))
+
+    def lineEdits(self):
+        self.userNameLineEdit.setFont(QFont(self.tanha[0], 10))
         self.passwordLineEdit.textChanged.connect(self.validat)
 
     def butten(self):
@@ -163,7 +374,7 @@ class SignUp(QWidget):
             self.widthCheck.setPixmap(QPixmap('./image/cross.png'))
             self.widthCheckResult = False
 
-        if re.findall("^(?=.* ?[A-Z])(?=.* ?[a-z])", password):
+        if re.findall("^(?=.* ?[A-Z])(?=.* ?[a-z])", password) and not re.findall(" +", password):
             self.capitalLettersCheck.setPixmap(QPixmap('./image/accept.png'))
             self.capitalLettersCheckResult = True
         else:
@@ -193,7 +404,7 @@ class SignUp(QWidget):
         userNameValid = False
         passwordValid = False
         rePasswordValid = False
-        if userName.replace(' ',''):
+        if userName.replace(' ', ''):
             if DataBase.checkUserName(userName):
                 self.userNameErrorLabel.setText('')
                 userNameValid = True
@@ -222,7 +433,7 @@ class SignUp(QWidget):
             massage.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
             anwser = massage.exec()
             if anwser == QMessageBox.Ok:
-                DataBase.createAccount(userName, password)
+                DataBase.createAccount(userName, password, '', '', '', False)
                 self.userNameLineEdit.setText('')
                 self.passwordLineEdit.setText('')
                 self.repeatPasswordLineEdit.setText('')
@@ -231,16 +442,71 @@ class SignUp(QWidget):
                 massage2.setStandardButtons(QMessageBox.Ok)
                 massage2.exec()
 
-class Main(QMainWindow):
+
+class TeacherMainPage(QMainWindow):
     def __init__(self):
-        super(Main, self).__init__()
-        loadUi('./ui/mainPage.ui', self)
-        self.shadows()
+        super(TeacherMainPage, self).__init__()
+        loadUi('./ui/teacherMainPage.ui', self)
         self.fonts()
-        self.lineEdit()
-        self.comboBox()
         self.labels()
         self.buttons()
+
+    def showEvent(self, a0: QShowEvent) -> None:
+        self.profileNameLabel.setText(str(loggedUser['userName']))
+
+        self.gotQuiz()
+
+    def fonts(self):
+        tanha = QFontDatabase.addApplicationFont('./font/Tanha.ttf')
+        self.tanha = QFontDatabase.applicationFontFamilies(tanha)
+
+    def labels(self):
+        self.titleLabel.setFont(QFont(self.tanha[0], 12))
+        self.emptyLabel.setFont(QFont(self.tanha[0], 10))
+        self.profileNameLabel.setFont(QFont(self.tanha[0], 10))
+
+    def gotQuiz(self):
+        while self.contectLayout.count():
+            cardFrame = self.contectLayout.takeAt(0)
+            if cardFrame.widget():
+                cardFrame.widget().deleteLater()
+
+        row = 0
+        column = 0
+        DataBase.checkConnection(self)
+        exams = DataBase.gotAllExams(str(loggedUser['id']))
+        if exams != []:
+            for exam in exams:
+                self.emptyLabel.setDisabled(True)
+                card = TeacherCardFrame(exam)
+                self.contectLayout.addWidget(card, row, column)
+                column += 1
+                if column == 1:
+                    row += 1
+                    column = 0
+
+    def buttons(self):
+        self.profileSettingButton.setFont(QFont(self.tanha[0], 10))
+        self.ratingTableButton.setFont(QFont(self.tanha[0], 10))
+        self.createQuizButton.setFont(QFont(self.tanha[0], 10))
+
+        self.profileSettingButton.clicked.connect(lambda : profileSettingWindow.show())
+        self.createQuizButton.clicked.connect(lambda : createNewQuizWindow.show())
+
+
+class TeacherCardFrame(QFrame):
+    def __init__(self, exam):
+        super(TeacherCardFrame, self).__init__()
+        loadUi('./ui/teacherCardFrame.ui', self)
+        self.exam = exam
+        self.fonts()
+        self.shadows()
+        self.labels()
+        self.button()
+
+    def fonts(self):
+        tanha = QFontDatabase.addApplicationFont('./font/Tanha.ttf')
+        self.tanha = QFontDatabase.applicationFontFamilies(tanha)
 
     def shadows(self):
         self.shadow1 = QGraphicsDropShadowEffect(self)
@@ -248,16 +514,302 @@ class Main(QMainWindow):
         self.shadow1.setColor(QColor(150, 150, 150).darker())
         self.shadow1.setOffset(0)
 
-        self.searchFrame.setGraphicsEffect(self.shadow1)
+        self.shadow2 = QGraphicsDropShadowEffect(self)
+        self.shadow2.setBlurRadius(5)
+        self.shadow2.setColor(QColor(93, 93, 93).darker())
+        self.shadow2.setOffset(0)
 
-    def showEvent(self, event):
+        self.showMoreButton.setGraphicsEffect(self.shadow2)
+
+    def labels(self):
+        self.cardTitle.setFont(QFont(self.tanha[0], 12))
+        self.scoreLabel.setFont(QFont(self.tanha[0], 9))
+        self.questionsCountLabel.setFont(QFont(self.tanha[0], 9))
+        self.classLabel.setFont(QFont(self.tanha[0], 9))
+
+        self.label.setFont(QFont(self.tanha[0], 12))
+        self.codeLineEdit.setFont(QFont(self.tanha[0], 12))
+
+        print(self.exam)
+        self.codeLineEdit.setText(self.exam['quiz_code'])
+
+        self.cardTitle.setText(self.exam['title'])
+        # self.cardShortDes.setText(self.exam['info'])
+        self.scoreLabel.setText(f'امتیاز:{str(self.exam["score"])}')
+        self.questionsCountLabel.setText(f'تعداد سوال:{str(self.exam["questions_count"])}')
+        self.classLabel.setText(f'پایه:{str(self.exam["quiz_class"])}')
+        self.imageLabel.setPixmap(QPixmap('./image/article2.jpg'))
+
+    def button(self):
+        self.showMoreButton.setFont(QFont(self.tanha[0], 9))
+
+
+
+class CreateNewQuizPage(QWidget):
+    def __init__(self):
+        super(CreateNewQuizPage, self).__init__()
+        loadUi('./ui/createQuizPage.ui', self)
+        self.fonts()
+        self.buttons()
+
+
+    def showEvent(self, a0: QShowEvent) -> None:
+        self.count = 1
+
+        self.newQuiz = {'title': '', 'quiz_class': '', 'info': '', 'score': '', 'questions_count': '', 'time': ''}
+        self.questions = {}
+
+
+    def fonts(self):
+        tanha = QFontDatabase.addApplicationFont('./font/Tanha.ttf')
+        self.tanha = QFontDatabase.applicationFontFamilies(tanha)
+
+        self.title.setFont(QFont(self.tanha[0], 12))
+        self.titleLabel.setFont(QFont(self.tanha[0], 10))
+        self.classLabel.setFont(QFont(self.tanha[0], 10))
+        self.timeLabel.setFont(QFont(self.tanha[0], 10))
+        self.shortDesLabel.setFont(QFont(self.tanha[0], 10))
+
+        self.errorLabel.setFont(QFont(self.tanha[0], 10))
+
+        self.titleLineEdit.setFont(QFont(self.tanha[0], 10))
+        self.classComboBox.setFont(QFont(self.tanha[0], 10))
+        self.timeSpinBox.setFont(QFont(self.tanha[0], 10))
+        self.shortDesTextEdit.setFont(QFont(self.tanha[0], 10))
+
+        self.label_5.setFont(QFont(self.tanha[0], 12))
+        self.label_6.setFont(QFont(self.tanha[0], 10))
+        self.questionScoreLabel.setFont(QFont(self.tanha[0], 10))
+        self.questionCountLabel.setFont(QFont(self.tanha[0], 10))
+
+        self.questionScoreLineEdit.setFont(QFont(self.tanha[0], 10))
+        self.randomCountLineEdit.setFont(QFont(self.tanha[0], 10))
+        self.questionCountLineEdit.setFont(QFont(self.tanha[0], 10))
+
+        self.addButton.setFont(QFont(self.tanha[0], 10))
+        self.saveQuizButton.setFont(QFont(self.tanha[0], 12))
+
+    def buttons(self):
+        self.addButton.clicked.connect(self.addQuestion)
+        self.saveQuizButton.clicked.connect(self.createQuiz)
+
+        self.randomCheckBox.stateChanged.connect(self.randomSet)
+
+    #====================================================#
+    def randomSet(self, state):
+        if state == 2:
+            self.randomCountLineEdit.setEnabled(True)
+        else:
+            self.randomCountLineEdit.setText('')
+            self.randomCountLineEdit.setEnabled(False)
+
+    def addQuestion(self):
+        self.questionsLayout.addWidget(TeacherQuestionFrame(self.count))
+        self.questionCountLineEdit.setText(str(self.count))
+        self.count += 1
+
+    def createQuiz(self):
+        DataBase.checkConnection(createNewQuizWindow)
+        title = self.titleLineEdit.text()
+        quizClass = self.classComboBox.currentText()
+        time = self.timeSpinBox.text()
+        info = self.shortDesTextEdit.toPlainText()
+        score = self.questionScoreLineEdit.text()
+        randomCount = None
+        is_random = False
+
+        if title.replace(' ', '') and quizClass and int(time) > 0 and info.replace(' ', ''):
+            try:
+                int(score)
+                if int(score) > 0:
+                    if self.randomCheckBox.checkState() == Qt.Checked:
+                        is_random = True
+                    if is_random:
+                        try:
+                            int(self.randomCountLineEdit.text())
+                            if int(self.randomCountLineEdit.text()) > 0:
+                                if int(self.randomCountLineEdit.text()) < int(self.questionCountLineEdit.text()):
+                                    randomCount = int(self.randomCountLineEdit.text())
+                                else:
+                                    self.errorLabel.setText('تعداد سوال نباید از تعداد کل سوالات وارد شده کمتر باشد')
+                            else:
+                                self.errorLabel.setText('تعداد سوال را درست وارد کنید')
+                        except:
+                            self.errorLabel.setText('تعداد سوال را درست وارد کنید')
+
+                    if self.questions != {}:
+                        massage = QMessageBox(self)
+                        massage.setText(f'آیا از اطلاعات وارد شده مطمئن هستید؟(آزمون ثبت شده قابل ویرایش نیست.)')
+                        massage.setIcon(QMessageBox.Warning)
+                        massage.setWindowTitle('مهم')
+                        massage.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+                        anwser = massage.exec()
+                        if anwser == QMessageBox.Ok:
+                            valid = True
+                            for question in self.questions:
+                                newQuestion = self.questions[question]['question']
+                                if not newQuestion['questionText'] or not newQuestion['optionOne'] or not newQuestion['optionTwo'] or not newQuestion['optionThree'] or not newQuestion['optionFour']:
+                                    valid = False
+
+                            if valid:
+                                newQuiz = DataBase.createQuiz(title, quizClass, int(time), info, randomCount, is_random,
+                                                              loggedUser['id'])
+                                for question in self.questions:
+                                    newQuestion = self.questions[question]['question']
+                                    DataBase.addQuestion(newQuestion['questionText'], newQuestion['optionOne'], newQuestion['optionTwo'], newQuestion['optionThree'], newQuestion['optionFour'], newQuestion['anwser'], score, newQuiz['id'])
+
+                                self.titleLineEdit.setText('')
+                                self.classComboBox.setCurrentIndex(0)
+                                self.timeSpinBox.setValue(0)
+                                self.shortDesTextEdit.setText('')
+                                self.questionScoreLineEdit.setText('')
+                                self.randomCountLineEdit.setText('')
+                                self.questions.clear()
+                                self.errorLabel.setText('')
+                                teacherMainWindow.gotQuiz()
+                                self.close()
+
+                            else:
+                                self.errorLabel.setText('متن یا گزینه های بعضی سوال ها خالی است')
+
+                    else:
+                        self.errorLabel.setText('هنوز هیچ سوالی وارد نکرده اید')
+                else:
+                    self.errorLabel.setText('امتیاز هر سوال را درست وارد کنید')
+            except:
+                self.errorLabel.setText('امتیاز هر سوال را درست وارد کنید')
+        else:
+            self.errorLabel.setText('اطلاعات آزمون را کامل کنید')
+
+
+class TeacherQuestionFrame(QFrame):
+    def __init__(self, count):
+        super(TeacherQuestionFrame, self).__init__()
+        loadUi('./ui/teacherQuestionFrame.ui', self)
+
+        self.count = count
+        self.question = {
+            'questionText': '',
+            'optionOne': '',
+            'optionTwo': '',
+            'optionThree': '',
+            'optionFour': '',
+            'anwser': 1
+        }
+        createNewQuizWindow.questions[self.count] = {'id':self.count , 'question': self.question}
+        # print(createNewQuizWindow.questions)
+        self.fonts()
+        self.shadow()
+        self.labels()
+        self.buttons()
+        self.textEdits()
+
+    def shadow(self):
+        self.shadow1 = QGraphicsDropShadowEffect(self)
+        self.shadow1.setBlurRadius(12)
+        self.shadow1.setColor(QColor(150, 150, 150).darker())
+        self.shadow1.setOffset(0)
+
+        self.setGraphicsEffect(self.shadow1)
+
+    def fonts(self):
+        tanha = QFontDatabase.addApplicationFont('./font/Tanha.ttf')
+        self.tanha = QFontDatabase.applicationFontFamilies(tanha)
+
+        self.questionNumLabel.setFont(QFont(self.tanha[0], 8))
+        self.questionTextEdit.setFont(QFont(self.tanha[0], 8))
+
+        self.optionOneButton.setFont(QFont(self.tanha[0], 8))
+        self.oneTextEdit.setFont(QFont(self.tanha[0], 8))
+
+        self.optionTwoButton.setFont(QFont(self.tanha[0], 8))
+        self.twoTextEdit.setFont(QFont(self.tanha[0], 8))
+
+        self.optionThreeButton.setFont(QFont(self.tanha[0], 8))
+        self.threeTextEdit.setFont(QFont(self.tanha[0], 8))
+
+        self.optionFourButton.setFont(QFont(self.tanha[0], 8))
+        self.fourTextEdit.setFont(QFont(self.tanha[0], 8))
+
+        self.deleteButton.setFont(QFont(self.tanha[0], 10))
+
+    def textEdits(self):
+        self.questionTextEdit.textChanged.connect(lambda : self.changeQuestionInfo('questionText', self.questionTextEdit.toPlainText()))
+
+        self.oneTextEdit.textChanged.connect(lambda : self.changeQuestionInfo('optionOne', self.oneTextEdit.toPlainText()))
+
+        self.twoTextEdit.textChanged.connect(lambda : self.changeQuestionInfo('optionTwo', self.twoTextEdit.toPlainText()))
+
+        self.threeTextEdit.textChanged.connect(lambda : self.changeQuestionInfo('optionThree', self.threeTextEdit.toPlainText()))
+
+        self.fourTextEdit.textChanged.connect(
+            lambda: self.changeQuestionInfo('optionFour', self.fourTextEdit.toPlainText()))
+
+    def buttons(self):
+        self.optionOneButton.toggled.connect(lambda checked: self.setAnwser('1') if checked else None)
+        self.optionTwoButton.toggled.connect(lambda checked: self.setAnwser('2') if checked else None)
+        self.optionThreeButton.toggled.connect(lambda checked: self.setAnwser('3') if checked else None)
+        self.optionFourButton.toggled.connect(lambda checked: self.setAnwser('4') if checked else None)
+
+        self.deleteButton.clicked.connect(self.deleteFrame)
+
+    def labels(self):
+        self.questionNumLabel.setText(f'.{self.count}')
+
+
+    #======================================================#
+    def changeQuestionInfo(self, part, text):
+        createNewQuizWindow.questions[self.count]['question'][part] = text
+
+    def setAnwser(self, option):
+        createNewQuizWindow.questions[self.count]['question']['anwser'] = int(option)
+        # print(createNewQuizWindow.questions[self.count]['question'])
+
+    def deleteFrame(self):
+        massage = QMessageBox(self)
+        massage.setText(f'آیا از حذف سوال {self.count} مطمئن هستید؟')
+        massage.setIcon(QMessageBox.Warning)
+        massage.setWindowTitle('مهم')
+        massage.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        anwser = massage.exec()
+        if anwser == QMessageBox.Ok:
+            widget = createNewQuizWindow.questionsLayout.itemAt(self.count - 1).widget()
+            createNewQuizWindow.questionsLayout.removeWidget(widget)
+
+            createNewQuizWindow.questions.pop(self.count)
+
+            for index in range(createNewQuizWindow.questionsLayout.count()):
+                frame = createNewQuizWindow.questionsLayout.itemAt(index).widget()
+                frame.questionNumLabel.setText(f'.{index + 1}')
+                createNewQuizWindow.count -= 1
+                # print(list(createNewQuizWindow.questions.keys()), range(createNewQuizWindow.questionsLayout.count()), list(createNewQuizWindow.questions.keys())[index])
+                # print(createNewQuizWindow.questions[list(createNewQuizWindow.questions.keys())[index]])
+                # createNewQuizWindow.questions[index + 1] = createNewQuizWindow.questions.pop(list(createNewQuizWindow.questions.keys())[index])
+
+
+
+
+
+
+class StudentMainPage(QMainWindow):
+    def __init__(self):
+        super(StudentMainPage, self).__init__()
+        loadUi('./ui/studendMainPage.ui', self)
+        # self.shadows()
+        self.fonts()
+        self.lineEdit()
+        self.comboBox()
+        self.labels()
+        self.buttons()
+
+    def showEvent(self, a0: QShowEvent) -> None:
         self.profileNameLabel.setText(str(loggedUser['userName']))
         self.profileScoreLabel.setText(f' امتیاز:{loggedUser["score"]}')
 
         row = 0
         column = 0
-        DataBase.checkConnection(mainWindow)
-        exams = DataBase.gotAllExams()
+        DataBase.checkConnection(studentMainWindow)
+        exams = DataBase.gotAllExams('')
         for exam in exams:
             card = CardFrame(exam)
             self.contectLayout.addWidget(card, row, column)
@@ -271,29 +823,30 @@ class Main(QMainWindow):
         self.tanha = QFontDatabase.applicationFontFamilies(tanha)
 
     def lineEdit(self):
-        self.searchLineEdit.setFont(QFont(self.tanha[0],10))
+        self.searchLineEdit.setFont(QFont(self.tanha[0], 10))
 
     def labels(self):
-        self.profileNameLabel.setFont(QFont(self.tanha[0],11))
-        self.profileScoreLabel.setFont(QFont(self.tanha[0],11))
+        self.profileNameLabel.setFont(QFont(self.tanha[0], 11))
+        self.profileScoreLabel.setFont(QFont(self.tanha[0], 11))
 
-        self.classLabel.setFont(QFont(self.tanha[0],10))
+        self.searchLabel.setFont(QFont(self.tanha[0], 10))
+        self.classLabel.setFont(QFont(self.tanha[0], 10))
 
         self.profileImageLabel.setPixmap(QPixmap('./image/personIcon.png'))
 
     def buttons(self):
-        self.ratingTableButton.setFont(QFont(self.tanha[0],10))
-        self.profileSettingButton.setFont(QFont(self.tanha[0],10))
-        self.searchButton.setFont(QFont(self.tanha[0],10))
+        self.ratingTableButton.setFont(QFont(self.tanha[0], 10))
+        self.profileSettingButton.setFont(QFont(self.tanha[0], 10))
+        self.searchButton.setFont(QFont(self.tanha[0], 10))
 
         self.profileSettingButton.clicked.connect(self.showProfileSettingPage)
 
         self.searchButton.clicked.connect(self.searchInExams)
 
     def comboBox(self):
-        self.classComboBox.setFont(QFont(self.tanha[0],10))
+        self.classComboBox.setFont(QFont(self.tanha[0], 10))
 
-    #=========================================================#
+    # =========================================================#
     def showProfileSettingPage(self):
         profileSettingWindow.show()
 
@@ -305,7 +858,7 @@ class Main(QMainWindow):
 
         row = 0
         column = 0
-        DataBase.checkConnection(mainWindow)
+        DataBase.checkConnection(studentMainWindow)
         exams = DataBase.filterExames(self.searchLineEdit.text(), self.classComboBox.currentText())
         for exam in exams:
             card = CardFrame(exam)
@@ -314,6 +867,7 @@ class Main(QMainWindow):
             if column == 1:
                 row += 1
                 column = 0
+
 
 class ProfileSetting(QWidget):
     def __init__(self):
@@ -340,29 +894,29 @@ class ProfileSetting(QWidget):
         self.tanha = QFontDatabase.applicationFontFamilies(tanha)
 
     def labels(self):
-        self.emailLabel.setFont(QFont(self.tanha[0],10))
-        self.classLabel.setFont(QFont(self.tanha[0],10))
+        self.emailLabel.setFont(QFont(self.tanha[0], 10))
+        self.classLabel.setFont(QFont(self.tanha[0], 10))
 
     def lineEdits(self):
-        self.userNameLineEdit.setFont(QFont(self.tanha[0],10))
-        self.scoreLineEdit.setFont(QFont(self.tanha[0],10))
+        self.userNameLineEdit.setFont(QFont(self.tanha[0], 10))
+        self.scoreLineEdit.setFont(QFont(self.tanha[0], 10))
 
-        self.emailLineEdit.setFont(QFont(self.tanha[0],10))
+        self.emailLineEdit.setFont(QFont(self.tanha[0], 10))
 
     def buttons(self):
-        self.saveButton.setFont(QFont(self.tanha[0],10))
-        self.changeUserNameButton.setFont(QFont(self.tanha[0],10))
-        self.changePasswordButton.setFont(QFont(self.tanha[0],10))
-        self.changeProfileImageButton.setFont(QFont(self.tanha[0],10))
+        self.saveButton.setFont(QFont(self.tanha[0], 10))
+        self.changeUserNameButton.setFont(QFont(self.tanha[0], 10))
+        self.changePasswordButton.setFont(QFont(self.tanha[0], 10))
+        self.changeProfileImageButton.setFont(QFont(self.tanha[0], 10))
 
         self.saveButton.clicked.connect(self.saveInfo)
         self.changeUserNameButton.clicked.connect(self.showChangeUserNameWindow)
         self.changePasswordButton.clicked.connect(self.showChangePasswordWindow)
 
     def comboBox(self):
-        self.classComboBox.setFont(QFont(self.tanha[0],10))
+        self.classComboBox.setFont(QFont(self.tanha[0], 10))
 
-    #=======================================================#
+    # =======================================================#
     def saveInfo(self):
         DataBase.checkConnection(profileSettingWindow)
         newEmail = self.emailLineEdit.text()
@@ -385,6 +939,7 @@ class ProfileSetting(QWidget):
 
     def showChangePasswordWindow(self):
         changePasswordWindow.show()
+
 
 class ChangeUserName(QDialog):
     def __init__(self):
@@ -417,7 +972,7 @@ class ChangeUserName(QDialog):
     def buttons(self):
         self.buttonBox.clicked.connect(self.saveNewUserName)
 
-    #======================================================#
+    # ======================================================#
     def checkUserName(self):
         DataBase.checkConnection(profileSettingWindow)
         text = self.userNameLineEdit.text()
@@ -434,15 +989,18 @@ class ChangeUserName(QDialog):
             self.userNameValid = True
             self.errorLabel.setText('')
 
-
     def saveNewUserName(self, button):
         if button.text() == 'OK':
             if self.userNameValid == True:
                 if self.userNameLineEdit.text() != loggedUser['userName']:
                     DataBase.updateUserName(loggedUser['userName'], self.userNameLineEdit.text())
                     loggedUser['userName'] = self.userNameLineEdit.text()
-                    mainWindow.profileNameLabel.setText(str(loggedUser['userName']))
+                    if loggedUser['isTeacher']:
+                        teacherMainWindow.profileNameLabel.setText(str(loggedUser['userName']))
+                    else:
+                        studentMainWindow.profileNameLabel.setText(str(loggedUser['userName']))
                     profileSettingWindow.userNameLineEdit.setText(loggedUser['userName'])
+
 
 class ChangePassword(QDialog):
     def __init__(self):
@@ -497,7 +1055,7 @@ class ChangePassword(QDialog):
     def buttons(self):
         self.buttonBox.clicked.connect(self.saveNewPassword)
 
-    #===========================================================#
+    # ===========================================================#
     def passwordValidat(self):
         password = self.passwordLineEdit.text()
 
@@ -508,7 +1066,7 @@ class ChangePassword(QDialog):
             self.widthCheck.setPixmap(QPixmap('./image/cross.png'))
             self.widthCheckResult = False
 
-        if re.findall("^(?=.* ?[A-Z])(?=.* ?[a-z])", password):
+        if re.findall("^(?=.* ?[A-Z])(?=.* ?[a-z])", password) and not re.findall(" +", password):
             self.capitalLettersCheck.setPixmap(QPixmap('./image/accept.png'))
             self.capitalLettersCheckResult = True
         else:
@@ -550,10 +1108,11 @@ class ChangePassword(QDialog):
                     DataBase.updatePassword(loggedUser['userName'], self.passwordLineEdit.text())
                     loggedUser['password'] = self.passwordLineEdit.text()
 
+
 class CardFrame(QFrame):
     def __init__(self, exam):
         super(CardFrame, self).__init__()
-        loadUi('./ui/cardFrame2.ui',self)
+        loadUi('./ui/cardFrame2.ui', self)
         self.exam = exam
         self.userDoExame = DataBase.checkUserDoExame(int(loggedUser['id']), int(self.exam['id']))
         self.fonts()
@@ -576,7 +1135,6 @@ class CardFrame(QFrame):
         self.shadow2.setColor(QColor(93, 93, 93).darker())
         self.shadow2.setOffset(0)
 
-        # self.setGraphicsEffect(self.shadow1)
         self.showMoreButton.setGraphicsEffect(self.shadow2)
 
     def labels(self):
@@ -603,9 +1161,10 @@ class CardFrame(QFrame):
 
         self.showMoreButton.clicked.connect(self.showExameDetail)
 
-    #============================================================#
+    # ============================================================#
     def showExameDetail(self):
-        DataBase.checkConnection(mainWindow)
+        DataBase.checkConnection(studentMainWindow)
+        print(self.exam)
         selectedExam['id'] = str(self.exam['id'])
         selectedExam['examTitle'] = self.exam['title']
         selectedExam['examClass'] = self.exam['quiz_class']
@@ -614,6 +1173,8 @@ class CardFrame(QFrame):
         selectedExam['examQuestionsCount'] = str(self.exam['questions_count'])
         selectedExam['examTime'] = self.exam['time']
         selectedExam['examMaker'] = self.exam['maker']
+        selectedExam['is_random'] = self.exam['is_random']
+        selectedExam['random_count'] = self.exam['random_count']
         exameDetailWindow.show()
 
 
@@ -675,7 +1236,6 @@ class ExameDetail(QWidget):
         self.shadow7.setColor(QColor(93, 93, 93).darker())
         self.shadow7.setOffset(0)
 
-
         self.exameInfoLabel.setGraphicsEffect(self.shadow1)
         self.timeLabel.setGraphicsEffect(self.shadow2)
         self.scoreLabel.setGraphicsEffect(self.shadow3)
@@ -697,12 +1257,13 @@ class ExameDetail(QWidget):
         self.startExameButton.setFont(QFont(self.tanha[0], 13))
         self.startExameButton.clicked.connect(self.startExam)
 
-    #==========================================================#
+    # ==========================================================#
     def startExam(self):
         DataBase.checkConnection(exameDetailWindow)
         examePageWindow.show()
-        mainWindow.close()
+        studentMainWindow.close()
         self.close()
+
 
 class ExamePage(QWidget):
     def __init__(self):
@@ -716,18 +1277,39 @@ class ExamePage(QWidget):
         self.anweredCount = 0
 
     def showEvent(self, e):
+        count = 1
+        for question in range(int(selectedExam["examQuestionsCount"])):
+            button = QuestionButton(count)
+            button.setObjectName(str(count))
+            self.questionsLayout_2.addWidget(button)
+            count += 1
+
         self.targetTime = QDateTime.currentDateTime().addSecs(int(selectedExam['examTime']) * 60)
         self.examTimer.start()
 
         self.answeredLabel.setText(f'{self.anweredCount} از {selectedExam["examQuestionsCount"]}')
 
-        questions = random.sample(DataBase.gotExamQuestions(selectedExam['id']), k=int(selectedExam['examQuestionsCount']))
+        questions = []
+        if selectedExam['is_random']:
+            questions = random.sample(DataBase.gotExamQuestions(selectedExam['id']),
+                                    k=int(selectedExam['examQuestionsCount']))
+        else:
+            questions = DataBase.gotExamQuestions(selectedExam['id'])
+
         index = 1
         for question in questions:
-            currentExamQuestions.append({'idInExam': index, 'id': question['id'], 'question': question['question'], 'optionOne': question['optionOne'], 'optionTwo': question['optionTwo'], 'optionThree': question['optionThree'], 'optionFour': question['optionFour'], 'anwser': question['anwser'], 'score': question['score'], 'isAnwsered': False, 'userAnwser': ''})
+            currentExamQuestions.append({'idInExam': index, 'id': question['id'], 'question': question['question'],
+                                         'optionOne': question['optionOne'], 'optionTwo': question['optionTwo'],
+                                         'optionThree': question['optionThree'], 'optionFour': question['optionFour'],
+                                         'anwser': question['anwser'], 'score': question['score'], 'isAnwsered': False,
+                                         'userAnwser': ''})
             index += 1
         for question in currentExamQuestions:
             self.questionsStackedWidget.addWidget(QuestionFrame(question))
+
+    def closeEvent(self, a0: QCloseEvent):
+        DataBase.checkConnection(examePageWindow)
+        DataBase.saveUsersDoExame(int(loggedUser['id']), int(selectedExam['id']), 0)
 
     def fonts(self):
         tanha = QFontDatabase.addApplicationFont('./font/Tanha.ttf')
@@ -748,27 +1330,8 @@ class ExamePage(QWidget):
         self.questionsLayout.addWidget(self.questionsStackedWidget)
 
     def buttons(self):
-        self.nextButton.setFont(QFont(self.tanha[0], 10))
-        self.previousButton.setFont(QFont(self.tanha[0], 10))
         self.finishButton.setFont(QFont(self.tanha[0], 10))
-
-        self.nextButton.clicked.connect(lambda : self.changeQuestion('next'))
-        self.previousButton.clicked.connect(lambda : self.changeQuestion('previous'))
         self.finishButton.clicked.connect(self.finishExame)
-
-    #=============================================================#
-    def changeQuestion(self, event):
-        if event == 'next':
-            self.questionsStackedWidget.setCurrentIndex(self.questionsStackedWidget.currentIndex() + 1)
-        else:
-            self.questionsStackedWidget.setCurrentIndex(self.questionsStackedWidget.currentIndex() - 1)
-        # count = 0
-        # for question in currentExamQuestions:
-        #     if question['userAnwser']:
-        #         count += 1
-        # self.anweredCount = count
-        # self.answeredLabel.setText(f'{self.anweredCount} از {selectedExam["examQuestionsCount"]}')
-
 
     def checkTime(self):
         now = QDateTime.currentDateTime()
@@ -794,12 +1357,11 @@ class ExamePage(QWidget):
             if question['isAnwsered'] == False:
                 noneAnwser += 1
             elif str(question['anwser']) == str(question['userAnwser']):
-                rightAnwser +=1
+                rightAnwser += 1
                 scoreGot += int(question['score'])
             elif str(question['anwser']) != str(question['userAnwser']):
                 wrongAnwser += 1
 
-        DataBase.saveUsersDoExame(int(loggedUser['id']), int(selectedExam['id']), int(scoreGot))
         DataBase.updateScore(int(loggedUser['id']), int(scoreGot))
         loggedUser['score'] = int(loggedUser['score']) + scoreGot
 
@@ -818,6 +1380,48 @@ class ExamePage(QWidget):
         examResultWindow.show()
 
 
+class QuestionButton(QPushButton):
+    def __init__(self, number):
+        super(QuestionButton, self).__init__()
+        self.number = number
+        self.shadow()
+        self.font()
+        self.setting()
+
+    def shadow(self):
+        self.shadow1 = QGraphicsDropShadowEffect(self)
+        self.shadow1.setBlurRadius(12)
+        self.shadow1.setColor(QColor(150, 150, 150).darker())
+        self.shadow1.setOffset(0)
+
+        self.setGraphicsEffect(self.shadow1)
+
+    def font(self):
+        tanha = QFontDatabase.addApplicationFont('./font/Tanha.ttf')
+        self.tanha = QFontDatabase.applicationFontFamilies(tanha)
+
+        self.setFont(QFont(self.tanha[0], 10))
+
+    def setting(self):
+        self.clicked.connect(lambda: self.changeQuestion(self.number))
+        self.setText(str(self.number))
+        self.setMinimumSize(30, 30)
+        self.setMaximumSize(30, 30)
+        self.setStyleSheet('''
+                    border:none;
+                    background-color:#ffffff;
+                    border-radius:5px;
+                ''')
+
+    def changeQuestion(self, number):
+        examePageWindow.questionsStackedWidget.setCurrentIndex(int(self.number) - 1)
+        # count = 0
+        # for question in currentExamQuestions:
+        #     if question['userAnwser']:
+        #         count += 1
+        # self.anweredCount = count
+        # self.answeredLabel.setText(f'{self.anweredCount} از {selectedExam["examQuestionsCount"]}')
+
 
 class QuestionFrame(QFrame):
     def __init__(self, question):
@@ -832,13 +1436,13 @@ class QuestionFrame(QFrame):
         tanha = QFontDatabase.addApplicationFont('./font/Tanha.ttf')
         self.tanha = QFontDatabase.applicationFontFamilies(tanha)
 
-        self.anwserLabel.setFont(QFont(self.tanha[0], 10))
-
     def lineEdits(self):
         self.questionTextEdit.setFont(QFont(self.tanha[0], 10))
-        self.anwserLineEdit.setFont(QFont(self.tanha[0], 10))
-
-        self.questionTextEdit.setText(f'{self.question["idInExam"]}- {self.question["question"]}\n\n1: {self.question["optionOne"]}\n2: {self.question["optionTwo"]}\n3: {self.question["optionThree"]}\n4: {self.question["optionFour"]}')
+        self.questionTextEdit.setText(f'{self.question["idInExam"]}- {self.question["question"]}')
+        self.oneTextEdit.setText(self.question["optionOne"])
+        self.twoTextEdit.setText(self.question["optionTwo"])
+        self.threeTextEdit.setText(self.question["optionThree"])
+        self.fourTextEdit.setText(self.question["optionFour"])
 
     def buttons(self):
         self.optionOneButton.setFont(QFont(self.tanha[0], 10))
@@ -846,20 +1450,34 @@ class QuestionFrame(QFrame):
         self.optionThreeButton.setFont(QFont(self.tanha[0], 10))
         self.optionFourButton.setFont(QFont(self.tanha[0], 10))
 
-        self.optionOneButton.clicked.connect(lambda : self.addAnwser('1'))
-        self.optionTwoButton.clicked.connect(lambda: self.addAnwser('2'))
-        self.optionThreeButton.clicked.connect(lambda: self.addAnwser('3'))
-        self.optionFourButton.clicked.connect(lambda: self.addAnwser('4'))
+        self.oneTextEdit.setFont(QFont(self.tanha[0], 10))
+        self.twoTextEdit.setFont(QFont(self.tanha[0], 10))
+        self.threeTextEdit.setFont(QFont(self.tanha[0], 10))
+        self.fourTextEdit.setFont(QFont(self.tanha[0], 10))
 
-    #============================================================#
+        self.optionOneButton.toggled.connect(lambda checked: self.addAnwser('1') if checked else None)
+        self.optionTwoButton.toggled.connect(lambda checked: self.addAnwser('2') if checked else None)
+        self.optionThreeButton.toggled.connect(lambda checked: self.addAnwser('3') if checked else None)
+        self.optionFourButton.toggled.connect(lambda checked: self.addAnwser('4') if checked else None)
+
+    # ============================================================#
     def addAnwser(self, anwser):
-        self.anwserLineEdit.setText(f'گزینه{anwser}')
         for question in currentExamQuestions:
             if question['id'] == self.question['id']:
-                question['userAnwser'] = anwser
-                question['isAnwsered'] = True
-                examePageWindow.anweredCount += 1
-                examePageWindow.answeredLabel.setText(f'{examePageWindow.anweredCount} از {selectedExam["examQuestionsCount"]}')
+                if not question['isAnwsered']:
+                    question['userAnwser'] = anwser
+                    question['isAnwsered'] = True
+                    examePageWindow.anweredCount += 1
+                    examePageWindow.answeredLabel.setText(
+                        f'{examePageWindow.anweredCount} از {selectedExam["examQuestionsCount"]}')
+                    button = examePageWindow.findChild(QPushButton, str(question['idInExam']))
+                    button.setStyleSheet('''
+                        border:1px solid #19aa00;
+                        background-color:#ffffff;
+                        border-radius:5px;
+                    ''')
+                else:
+                    question['userAnwser'] = anwser
 
 
 class ExamResult(QWidget):
@@ -950,26 +1568,30 @@ class ExamResult(QWidget):
         self.exitButton.setFont(QFont(self.tanha[0], 10))
         self.exitButton.clicked.connect(self.showMainPage)
 
-    #===========================================================#
+    # ===========================================================#
     def showMainPage(self):
         self.close()
-        mainWindow.show()
-
-
-
+        studentMainWindow.show()
 
 
 if __name__ == "__main__":
-    global registerWindow, mainWindow, exameDetailWindow, profileSettingWindow, changeUserNameWindow, changePasswordWindow, examePageWindow, examResultWindow, currentExamQuestions, loggedUser, selectedExam, finishedExameInfo
+    global registerWindow, studentSignUpWindow, teacherSignUpWindow, createNewQuizWindow, studentMainWindow, teacherMainWindow, exameDetailWindow, profileSettingWindow, changeUserNameWindow, changePasswordWindow, examePageWindow, examResultWindow, currentExamQuestions, loggedUser, selectedExam, finishedExameInfo
     app = QApplication(sys.argv)
 
-    loggedUser = {'id': '', 'userName': '', 'password': '', 'score': '', 'class': '', 'email': '', 'profileImage': ''}
-    selectedExam = {'id': '', 'examTitle': '', 'examClass': '', 'examInfo': '', 'examScore': '', 'examQuestionsCount': '', 'examTime': '', 'examMaker': '', 'timeUserFinished': '', }
+    loggedUser = {'id': '', 'userName': '', 'password': '', 'score': '', 'class': '', 'email': '', 'profileImage': '', 'isTeacher': ''}
+    selectedExam = {'id': '', 'examTitle': '', 'examClass': '', 'examInfo': '', 'examScore': '',
+                    'examQuestionsCount': '', 'examTime': '', 'examMaker': '', 'timeUserFinished': '', 'is_random': False, 'random_count': ''}
     finishedExameInfo = {'scoreGot': 0, 'wrongAnwser': 0, 'rightAnwser': 0, 'noneAnwser': 0}
     currentExamQuestions = []
 
     registerWindow = RegisterPage()
-    mainWindow = Main()
+    studentSignUpWindow = StudentSignUpPage()
+    teacherSignUpWindow = TeacherSignUpPage()
+
+    studentMainWindow = StudentMainPage()
+    teacherMainWindow = TeacherMainPage()
+    createNewQuizWindow = CreateNewQuizPage()
+
     exameDetailWindow = ExameDetail()
     examePageWindow = ExamePage()
     examResultWindow = ExamResult()
@@ -979,6 +1601,3 @@ if __name__ == "__main__":
 
     registerWindow.show()
     sys.exit(app.exec_())
-
-# password Space
-# exame question count

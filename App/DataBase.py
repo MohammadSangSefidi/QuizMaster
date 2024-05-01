@@ -26,17 +26,27 @@ def checkConnection(self) -> None:
 token = 'Karim 301978b023c19aee499db5f7527b2928e12ea04f'
 
 
-def createAccount(userName: str, password: str) -> None:
+def createAccount(userName: str, password: str, name:str, lastName:str, email:str,teacher:bool) -> None:
     endpoint = baseUrl + '/users/createUser/'
-    data = {
-        'username': userName,
-        'password': password
-    }
+    if teacher:
+        data = {
+            'username': userName,
+            'password': password,
+            'first_name': name,
+            'last_name': lastName,
+            'email': email,
+            'teacher': teacher
+        }
+    else:
+        data = {
+            'username': userName,
+            'password': password,
+            'teacher': teacher
+        }
     headers = {
         'Authorization': token
     }
     response = requests.post(endpoint, headers=headers, json=data)
-
 
 def checkUserName(userName: str) -> bool:
     endpoint = 'http://127.0.0.1:8000/users/checkUsername/'
@@ -54,7 +64,7 @@ def checkUser(userName: str, password: str) -> dict or None:
     endpoint = baseUrl + '/users/getUser/'
     data = {
         'username': userName,
-        'password': password
+        'password': password,
     }
     headers = {
         'Authorization': token
@@ -101,12 +111,59 @@ def updatePassword(userName: str, newPassword: str) -> str:
     return response.json()['message']
 
 
-def gotAllExams() -> list:
+def gotAllExams(teacherId:str) -> list:
     endpoint = baseUrl + '/quizes/gotQuizes/'
     headers = {
         'Authorization': token
     }
-    response = requests.get(endpoint, headers=headers)
+    if teacherId:
+        data = {
+            'teacherId': int(teacherId)
+        }
+    else:
+        data = {
+            'teacherId': None
+        }
+    response = requests.get(endpoint, headers=headers, json=data)
+    return response.json()
+
+
+def createQuiz(title:str, quizClass:str, time:int, info:str, randomCount, is_random:bool, teacherId:int) -> list:
+    endpoint = baseUrl + '/quizes/createQuiz/'
+    headers = {
+        'Authorization': token
+    }
+    data = {
+        'title': title,
+        'quiz_class': quizClass,
+        'info': info,
+        'time': time,
+        'is_random': is_random,
+        'random_count': randomCount,
+        'teacherId': teacherId
+    }
+
+    response = requests.post(endpoint, headers=headers, json=data)
+    return response.json()
+
+
+def addQuestion(questionText:str, optionOne:str, optionTwo:str, optionThree:str, optionFour:str, anwser:int, score:int, quizId:int) -> list:
+    endpoint = baseUrl + '/quizes/addQuestion/'
+    headers = {
+        'Authorization': token
+    }
+    data = {
+        'question': questionText,
+        'optionOne': optionOne,
+        'optionTwo': optionTwo,
+        'optionThree': optionThree,
+        'optionFour': optionFour,
+        'anwser': anwser,
+        'score': score,
+        'examId': quizId
+    }
+
+    response = requests.post(endpoint, headers=headers, json=data)
     return response.json()
 
 
@@ -162,7 +219,7 @@ def updateScore(id, score):
     return response.json()
 
 
-def checkUserDoExame(userId, exameId):
+def checkUserDoExame(userId:int, exameId:int):
     endpoint = baseUrl + '/quizes/checkQuizPlayers/'
     data = {
         'userId': userId,

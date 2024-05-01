@@ -18,12 +18,21 @@ class CreateUser(APIView):
 
     def post(self, request):
         data = UserSerializer(data=request.data)
-        if data.is_valid():
+        if data.is_valid(raise_exception=True):
             userName = data.validated_data['username']
             password = data.validated_data['password']
-            user = UserModel(username=userName)
-            user.set_password(password)
-            user.save()
+            teacher = request.data['teacher']
+            if teacher:
+                name = data.validated_data['first_name']
+                lastName = data.validated_data['last_name']
+                email = data.validated_data['email']
+                user = UserModel(username=userName, first_name=name, last_name=lastName, email=email, isTeacher=teacher)
+                user.set_password(password)
+                user.save()
+            else:
+                user = UserModel(username=userName, isTeacher=teacher)
+                user.set_password(password)
+                user.save()
             return Response({'message': 'success'})
         else:
             return Response({'message': 'data is not valid'})
@@ -56,11 +65,11 @@ class GetUser(APIView):
         if user is not None:
             if user.check_password(password):
                 if user.profile_image != '':
-                    return Response({'message': {'id': user.id, 'userName': user.username, 'password': user.password, 'score': user.score, 'class': user.user_class, 'email': user.email, 'profileImage': user.profile_image}})
+                    return Response({'message': {'id': user.id, 'userName': user.username, 'password': user.password, 'score': user.score, 'class': user.user_class, 'email': user.email, 'profileImage': user.profile_image, 'isTeacher': user.isTeacher}})
                 else:
                     return Response({'message': {'id': user.id, 'userName': user.username, 'password': user.password,
                                                  'score': user.score, 'class': user.user_class, 'email': user.email,
-                                                 'profileImage': None}})
+                                                 'profileImage': None, 'isTeacher': user.isTeacher}})
             else:
                 return Response({'message': None})
         else:

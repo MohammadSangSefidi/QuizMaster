@@ -16,7 +16,10 @@ class QuizSerializer(ModelSerializer):
             'score',
             'questions_count',
             'time',
-            'maker'
+            'maker',
+            'quiz_code',
+            'is_random',
+            'random_count'
         ]
 
     def get_maker(self, obj):

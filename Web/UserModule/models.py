@@ -8,3 +8,4 @@ class UserModel(AbstractUser):
     user_class = models.CharField(max_length=10, null=True, verbose_name='کلاس')
     email = models.EmailField(null=True, verbose_name='ایمیل')
     profile_image = models.ImageField(null=True, upload_to='images/users-profiles/', verbose_name='عکس پروفایل')
+    isTeacher = models.BooleanField(default=False, verbose_name='معلم هست/نیست')

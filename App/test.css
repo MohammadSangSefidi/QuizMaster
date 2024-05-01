@@ -1,4 +1,6 @@
 body{
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
+    border:1px solid #151414;
+    background-color: #ffff;
 }

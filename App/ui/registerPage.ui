@@ -12,8 +12,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
-    <height>0</height>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -133,7 +139,7 @@
             </size>
            </property>
            <property name="text">
-            <string>همکلاسی</string>
+            <string>QuizMaster</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
