@@ -19,7 +19,8 @@ class QuizSerializer(ModelSerializer):
             'maker',
             'quiz_code',
             'is_random',
-            'random_count'
+            'random_count',
+            'is_private'
         ]
 
     def get_maker(self, obj):

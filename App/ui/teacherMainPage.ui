@@ -112,14 +112,14 @@
              <widget class="QLabel" name="profileImageLabel">
               <property name="minimumSize">
                <size>
-                <width>80</width>
-                <height>80</height>
+                <width>100</width>
+                <height>100</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>80</width>
-                <height>80</height>
+                <width>100</width>
+                <height>100</height>
                </size>
               </property>
               <property name="sizeIncrement">
@@ -131,7 +131,7 @@
               <property name="styleSheet">
                <string notr="true">QFrame#profileImageLabel{
 backgound-color:#fffff;
-border-radius:40px;
+border-radius:50px;
 background-color:#ffffff;
 }
 QFrame#profileImageLabel::QPixmap{

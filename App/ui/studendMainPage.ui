@@ -112,14 +112,14 @@
              <widget class="QLabel" name="profileImageLabel">
               <property name="minimumSize">
                <size>
-                <width>80</width>
-                <height>80</height>
+                <width>100</width>
+                <height>100</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>80</width>
-                <height>80</height>
+                <width>100</width>
+                <height>100</height>
                </size>
               </property>
               <property name="sizeIncrement">
@@ -131,11 +131,8 @@
               <property name="styleSheet">
                <string notr="true">QFrame#profileImageLabel{
 backgound-color:#fffff;
-border-radius:40px;
+border-radius:50px;
 background-color:#ffffff;
-}
-QFrame#profileImageLabel::QPixmap{
-
 }</string>
               </property>
               <property name="text">
@@ -245,22 +242,6 @@ QFrame#profileImageLabel::QPixmap{
              <string>جدول امتیاز ها</string>
             </property>
            </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Minimum</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
           </item>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -380,6 +361,81 @@ QFrame#profileImageLabel::QPixmap{
             </property>
             <property name="text">
              <string>اعمال فیلتر</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QLabel" name="codeLabel">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>جستجو آزمون خصوصی:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="codeLineEdit">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QLineEdit#searchLineEdit{
+	color: #000000;
+    background-color: #ffffff;
+    border: 1px solid #7e7e7e;
+	border-radius: 5px;
+    outline: none;
+	padding-left: 5px;
+}</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+              <property name="placeholderText">
+               <string>کد آزمون مورد نظر را وارد کنید</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="searchCodeButton">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>جستجو</string>
             </property>
            </widget>
           </item>

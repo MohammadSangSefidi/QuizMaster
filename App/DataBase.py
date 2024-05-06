@@ -110,6 +110,26 @@ def updatePassword(userName: str, newPassword: str) -> str:
     response = requests.post(endpoint, headers=headers, json=data)
     return response.json()['message']
 
+def updateProfileImage(userName: str, newProfile:int) -> str:
+    endpoint = baseUrl + '/users/updateProfileImage/'
+    data = {
+        'username': userName,
+        'image': newProfile
+    }
+    headers = {
+        'Authorization': token
+    }
+    response = requests.post(endpoint, headers=headers, json=data)
+    return response.json()['message']
+
+def getLeaderBoard() -> list:
+    endpoint = baseUrl + '/users/getLeaderBoard/'
+    headers = {
+        'Authorization': token
+    }
+    response = requests.get(endpoint, headers=headers)
+    return response.json()['message']
+
 
 def gotAllExams(teacherId:str) -> list:
     endpoint = baseUrl + '/quizes/gotQuizes/'
@@ -177,7 +197,22 @@ def filterExames(text: str, exame_class: str) -> list:
         'Authorization': token
     }
     response = requests.get(endpoint, headers=headers, json=data)
-    return response.json()
+    if response.json()['message'] == 'not found':
+        return None
+    return response.json()['message']
+
+def searchPrivateQuiz(code: str) -> dict:
+    endpoint = baseUrl + '/quizes/getPrivateQuiz/'
+    data = {
+        'code': code,
+    }
+    headers = {
+        'Authorization': token
+    }
+    response = requests.get(endpoint, headers=headers, json=data)
+    if response.json()['message'] == 'code is not valid':
+        return None
+    return response.json()['message']
 
 
 def gotExamQuestions(examId: int) -> list:
@@ -192,7 +227,7 @@ def gotExamQuestions(examId: int) -> list:
     return response.json()
 
 
-def saveUsersDoExame(userId, exameId, scoreGot):
+def saveUsersDoExame(userId:int, exameId:int, scoreGot:int) -> dict:
     endpoint = baseUrl + '/quizes/saveQuizPlayer/'
     data = {
         'userId': userId,
@@ -206,7 +241,7 @@ def saveUsersDoExame(userId, exameId, scoreGot):
     return response.json()
 
 
-def updateScore(id, score):
+def updateScore(id:int, score:int) -> dict:
     endpoint = baseUrl + '/users/updateScore/'
     data = {
         'id': id,
@@ -229,6 +264,17 @@ def checkUserDoExame(userId:int, exameId:int):
         'Authorization': token
     }
     response = requests.post(endpoint, headers=headers, json=data)
+    return response.json()['message']
+
+def getQuizPlayers(examId:int):
+    endpoint = baseUrl + '/quizes/getQuizPlayers/'
+    data = {
+        'id': examId,
+    }
+    headers = {
+        'Authorization': token
+    }
+    response = requests.get(endpoint, headers=headers, json=data)
     return response.json()['message']
 
 

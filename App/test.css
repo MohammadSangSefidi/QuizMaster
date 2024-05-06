@@ -1,6 +1,7 @@
 body{
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-start-start-radius: ;
     border:1px solid #151414;
     background-color: #ffff;
 }

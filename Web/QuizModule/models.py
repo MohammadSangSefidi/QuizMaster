@@ -13,7 +13,7 @@ class QuizModel(models.Model):
     maker = models.ForeignKey(UserModel, null=True, on_delete=models.CASCADE, verbose_name='طراح آزمون')
     is_random = models.BooleanField(default=False, verbose_name='سوالات شانسی هست/نیست')
     random_count = models.IntegerField(null=True, verbose_name='تعداد سوالات شانسی')
-    quiz_code = models.CharField(null=True, max_length=10, verbose_name='کد آزمون')
+    quiz_code = models.CharField(null=True, max_length=11, verbose_name='کد آزمون')
     is_private = models.BooleanField(default=False, verbose_name='شخصی هست/نیست')
     is_delete = models.BooleanField(default=False, verbose_name='حذف شده/نشده')
 
@@ -31,6 +31,7 @@ class QuizModel(models.Model):
             return self.random_count * self.questionsmodel_set.first().score
         else:
             return len(self.questionsmodel_set.all()) *  self.questionsmodel_set.first().score
+
 
 class QuestionsModel(models.Model):
     question = models.TextField(verbose_name='متن سوال')

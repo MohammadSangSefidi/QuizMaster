@@ -9,4 +9,6 @@ urlpatterns = [
     path('updateUsername/', UpdateUsername.as_view()),
     path('updatePassword/', UpdatePassword.as_view()),
     path('updateScore/', UpdateScore.as_view()),
+    path('updateProfileImage/', UpdateProfileImage.as_view()),
+    path('getLeaderBoard/', GetLeaderBoard.as_view()),
 ]

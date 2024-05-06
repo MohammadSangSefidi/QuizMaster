@@ -1,11 +1,12 @@
-from django.shortcuts import render
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from Web.authentications import CustomTokenAuthentication
-from .serializers import UserSerializer
 from .models import UserModel
+from .serializers import UserSerializer
+
+
 # Create your views here.
 
 
@@ -26,11 +27,11 @@ class CreateUser(APIView):
                 name = data.validated_data['first_name']
                 lastName = data.validated_data['last_name']
                 email = data.validated_data['email']
-                user = UserModel(username=userName, first_name=name, last_name=lastName, email=email, isTeacher=teacher)
+                user = UserModel(username=userName, first_name=name, last_name=lastName, profile_image=1,email=email, isTeacher=teacher)
                 user.set_password(password)
                 user.save()
             else:
-                user = UserModel(username=userName, isTeacher=teacher)
+                user = UserModel(username=userName, profile_image=1, isTeacher=teacher)
                 user.set_password(password)
                 user.save()
             return Response({'message': 'success'})
@@ -64,12 +65,9 @@ class GetUser(APIView):
         user = UserModel.objects.filter(username=username).first()
         if user is not None:
             if user.check_password(password):
-                if user.profile_image != '':
-                    return Response({'message': {'id': user.id, 'userName': user.username, 'password': user.password, 'score': user.score, 'class': user.user_class, 'email': user.email, 'profileImage': user.profile_image, 'isTeacher': user.isTeacher}})
-                else:
-                    return Response({'message': {'id': user.id, 'userName': user.username, 'password': user.password,
-                                                 'score': user.score, 'class': user.user_class, 'email': user.email,
-                                                 'profileImage': None, 'isTeacher': user.isTeacher}})
+                return Response({'message': {'id': user.id, 'userName': user.username, 'password': user.password,
+                                             'score': user.score, 'class': user.user_class, 'email': user.email,
+                                             'profileImage': user.profile_image, 'isTeacher': user.isTeacher}})
             else:
                 return Response({'message': None})
         else:
@@ -91,11 +89,34 @@ class UpdateEmailAndClass(APIView):
         userName = data['username']
         newEmail = data['newEmail']
         newClass = data['newClass']
-        if userName is not None and newClass is not None and newEmail is not None :
+        if userName is not None and newClass is not None and newEmail is not None:
             user = UserModel.objects.filter(username=userName).first()
             if user is not None:
                 user.email = newEmail
                 user.user_class = newClass
+                user.save()
+                return Response({'message': 'success'})
+            else:
+                return Response({'message': 'username is not valid'})
+        else:
+            return Response({'message': 'data is not valid'})
+
+
+class UpdateProfileImage(APIView):
+    authentication_classes = [CustomTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({'message': 'get is not allowed'})
+
+    def post(self, request):
+        data = request.data
+        userName = data['username']
+        newImage = data['image']
+        if userName is not None and newImage is not None:
+            user = UserModel.objects.filter(username=userName).first()
+            if user is not None:
+                user.profile_image = int(newImage)
                 user.save()
                 return Response({'message': 'success'})
             else:
@@ -170,3 +191,18 @@ class UpdateScore(APIView):
                 return Response({'message': 'score is not valid'})
         else:
             return Response({'message': 'user id is not valid'})
+
+
+class GetLeaderBoard(APIView):
+    authentication_classes = [CustomTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = UserModel.objects.filter(isTeacher=False).order_by('-score')[:20]
+        query = []
+        for user in data:
+            query.append({'username': user.username, 'score': user.score, 'image': user.profile_image})
+        return Response({'message': query})
+
+    def post(self, request):
+        return Response({'message': 'post is not allowed'})

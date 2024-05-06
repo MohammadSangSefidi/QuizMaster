@@ -140,6 +140,12 @@ border:1px solid #383838;
          <height>30</height>
         </size>
        </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
        <property name="readOnly">
         <bool>true</bool>
        </property>
@@ -239,9 +245,14 @@ border:1px solid #383838;
         </size>
        </property>
        <property name="styleSheet">
-        <string notr="true">border:none;
-background-color:#ffffff;
-border-radius:5px;</string>
+        <string notr="true">QPushButton#showMoreButton{
+	color: #ffffff;
+	background-color:  rgb(239, 177, 31);
+    border-radius: 5px;
+}
+QPushButton#showMoreButton:hover {
+	background-color: rgb(255, 210, 73);
+}</string>
        </property>
        <property name="text">
         <string>مشاهده شرکت کنندگان</string>

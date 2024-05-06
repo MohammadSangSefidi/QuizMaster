@@ -1,6 +1,4 @@
 from django.db.models import Q
-from django.shortcuts import render
-
 # Create your views here.
 from django.utils.crypto import get_random_string
 from rest_framework.permissions import IsAuthenticated
@@ -47,7 +45,14 @@ class CreateQuiz(APIView):
             time = data.validated_data['time']
             is_random = data.validated_data['is_random']
             random_count = data.validated_data['random_count']
-            newQuiz = QuizModel(title=title, quiz_class=quiz_class, info=info, time=time, is_random=is_random, random_count=random_count, is_private=True, quiz_code=get_random_string(10))
+            code = '@' + get_random_string(10)
+            quiz = QuizModel.objects.filter(quiz_code=code).first()
+            while quiz is not None:
+                code = '@' + get_random_string(10)
+                quiz = QuizModel.objects.filter(quiz_code=code).first()
+
+            newQuiz = QuizModel(title=title, quiz_class=quiz_class, info=info, time=time, is_random=is_random,
+                                random_count=random_count, is_private=True, quiz_code=code)
             user = UserModel.objects.filter(id=id).first()
             newQuiz.maker = user
             newQuiz.save()
@@ -72,12 +77,12 @@ class AddQuestion(APIView):
         optionFour = request.data['optionFour']
         anwser = request.data['anwser']
         score = request.data['score']
-        newQuestion = QuestionsModel(question=questionText, option_one=optionOne, option_two=optionTwo, option_three=optionThree, option_four=optionFour, anwser=anwser, score=score)
+        newQuestion = QuestionsModel(question=questionText, option_one=optionOne, option_two=optionTwo,
+                                     option_three=optionThree, option_four=optionFour, anwser=anwser, score=score)
         quize = QuizModel.objects.filter(id=quizId).first()
         newQuestion.quiz = quize
         newQuestion.save()
         return Response({'message': 'accept'})
-
 
 
 class FilterQuizes(APIView):
@@ -89,22 +94,54 @@ class FilterQuizes(APIView):
         quizClass = request.data['class']
         if quizClass == 'هیچ کدام':
             if value == '':
-                query = QuizModel.objects.all()
-                quizes = QuizSerializer(query, many=True).data
-                return Response(quizes)
+                query = QuizModel.objects.filter(is_private=False)
+                if query is not None:
+                    quizes = QuizSerializer(query, many=True).data
+                    return Response({'message': quizes})
+                else:
+                    return Response({'message': 'not found'})
             else:
-                query = QuizModel.objects.filter(Q(title__contains=value) | Q(info__contains=value) | Q(maker__username__contains=value))
-                quizes = QuizSerializer(query, many=True).data
-                return Response(quizes)
+                query = QuizModel.objects.filter(
+                    (Q(title__contains=value) | Q(info__contains=value) | Q(maker__username__contains=value)) & Q(
+                        is_private=False))
+                if query is not None:
+                    quizes = QuizSerializer(query, many=True).data
+                    return Response({'message': quizes})
+                else:
+                    return Response({'message': 'not found'})
         else:
             if value == '':
-                query = QuizModel.objects.filter(quiz_class=quizClass)
-                quizes = QuizSerializer(query, many=True).data
-                return Response(quizes)
+                query = QuizModel.objects.filter(quiz_class=quizClass, is_private=False)
+                if query is not None:
+                    quizes = QuizSerializer(query, many=True).data
+                    return Response({'message': quizes})
+                else:
+                    return Response({'message': 'not found'})
             else:
-                query = QuizModel.objects.filter((Q(title__contains=value) | Q(info__contains=value) | Q(maker__username__contains=value)) & Q(quiz_class=quizClass))
-                quizes = QuizSerializer(query, many=True).data
-                return Response(quizes)
+                query = QuizModel.objects.filter(((Q(title__contains=value) | Q(info__contains=value) | Q(
+                    maker__username__contains=value)) & Q(quiz_class=quizClass)) & Q(is_private=False))
+                if query is not None:
+                    quizes = QuizSerializer(query, many=True).data
+                    return Response({'message': quizes})
+                else:
+                    return Response({'message': 'not found'})
+
+    def post(self, request):
+        return Response({'message': 'post is not allowed'})
+
+
+class GetPrivateQuiz(APIView):
+    authentication_classes = [CustomTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        code = request.data['code']
+        query = QuizModel.objects.filter(quiz_code=code, is_private=True).first()
+        if query is not None:
+            data = QuizSerializer(query).data
+            return Response({'message': data})
+        else:
+            return Response({'message': 'code is not valid'})
 
     def post(self, request):
         return Response({'message': 'post is not allowed'})
@@ -169,3 +206,22 @@ class CheckQuizPlayers(APIView):
                 return Response({'message': False})
         else:
             return Response({'message': 'user or quiz id is not valid'})
+
+
+class GetQuizPlayers(APIView):
+    authentication_classes = [CustomTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        id = request.data['id']
+        data = QuizModel.objects.filter(id=id).first()
+        if data is not None:
+            query = []
+            for result in data.quizplayersmodel_set.all().order_by('-score'):
+                query.append({'username': result.user.username, 'score': result.score, 'image': result.user.profile_image})
+            return Response({'message': query})
+        else:
+            return Response({'message': 'id is not valid'})
+
+    def post(self, request):
+        return Response({'message': 'post is not allowed'})
