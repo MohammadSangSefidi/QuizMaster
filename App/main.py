@@ -1312,6 +1312,11 @@ class ChangeProfilePage(QWidget):
         self.imagesLayout.addWidget(ImageFrame('./image/profiles/Student Avatar - 7.jpeg', '7'))
         self.imagesLayout.addWidget(ImageFrame('./image/profiles/Student Avatar - 8.jpeg', '8'))
         self.imagesLayout.addWidget(ImageFrame('./image/profiles/Student Avatar - 10.jpeg', '10'))
+        self.imagesLayout.addWidget(ImageFrame('./image/profiles/Student Avatar - 11.jpeg', '11'))
+        self.imagesLayout.addWidget(ImageFrame('./image/profiles/Student Avatar - 12.jpeg', '12'))
+        self.imagesLayout.addWidget(ImageFrame('./image/profiles/Student Avatar - 13.jpeg', '13'))
+        self.imagesLayout.addWidget(ImageFrame('./image/profiles/Student Avatar - 14.jpeg', '14'))
+        self.imagesLayout.addWidget(ImageFrame('./image/profiles/Student Avatar - 15.jpeg', '15'))
 
     def showEvent(self, a0: QShowEvent):
         if loggedUser['profileImage'] != 1:
