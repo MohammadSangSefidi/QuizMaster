@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>ساخت آزمون</string>
   </property>
   <property name="toolTip">
    <string/>
@@ -41,7 +41,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-182</y>
+        <y>0</y>
         <width>780</width>
         <height>880</height>
        </rect>
@@ -96,6 +96,9 @@
                <width>50</width>
                <height>30</height>
               </size>
+             </property>
+             <property name="maximum">
+              <number>200</number>
              </property>
             </widget>
            </item>

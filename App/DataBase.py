@@ -4,7 +4,7 @@ import sys
 import requests
 from PyQt5.QtWidgets import QMessageBox
 
-baseUrl = 'http://127.0.0.1:8000'
+baseUrl = 'https://mohsen84.pythonanywhere.com/'
 
 
 def checkConnection(self) -> None:
@@ -48,8 +48,9 @@ def createAccount(userName: str, password: str, name:str, lastName:str, email:st
     }
     response = requests.post(endpoint, headers=headers, json=data)
 
+
 def checkUserName(userName: str) -> bool:
-    endpoint = 'http://127.0.0.1:8000/users/checkUsername/'
+    endpoint = baseUrl + '/users/checkUsername/'
     data = {
         'username': userName
     }

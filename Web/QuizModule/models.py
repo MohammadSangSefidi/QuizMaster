@@ -18,10 +18,8 @@ class QuizModel(models.Model):
     is_delete = models.BooleanField(default=False, verbose_name='حذف شده/نشده')
 
     def __str__(self):
-        if self.is_random :
-            return self.random_count
-        else:
-            return len(self.questionsmodel_set.all())
+        return f'{self.title} : {self.quiz_class}'
+
 
     def questions_count(self):
         return len(self.questionsmodel_set.all())
@@ -42,6 +40,9 @@ class QuestionsModel(models.Model):
     anwser = models.IntegerField(verbose_name='گزینه درست')
     score = models.IntegerField(verbose_name='امتیاز')
     quiz = models.ForeignKey(QuizModel, on_delete=models.CASCADE, verbose_name='آزمون')
+
+    def __str__(self):
+        return f'{self.quiz.title} : {self.question}'
 
 
 class QuizPlayersModel(models.Model):
