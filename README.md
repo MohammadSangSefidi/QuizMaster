@@ -4,7 +4,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/github_username/repo_name">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="App/image/logo.png" alt="Logo" width="300" height="300">
   </a>
 
 <h3 align="center">Quiz Master</h3>
@@ -19,7 +19,8 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+![1720513634-9PV9](https://github.com/user-attachments/assets/e8c12340-c107-4103-b66a-1422ce239bd2)
+
 
 Quiz Master is a software for holding and participating in the online Quiz. Quiz Master has two types of users: students and teachers. Students can participate in the quizzes and earn points and find the desired quiz by searching. Teachers can create their own private quiz and provide it to students. Each private quiz has a special code that students can use to access the quiz they want. This software requires internet access in all sections to run. This software has these parts.: `login and sign up page`, `student main page`, `teacher main page`, `profile page`, `quiz pages`, `Leaderboard page`, `create quiz page`
 
